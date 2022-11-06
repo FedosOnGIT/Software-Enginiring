@@ -1,12 +1,15 @@
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import refactoring.servlet.AddProductServlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +21,8 @@ import static org.mockito.Mockito.*;
 public class AddProductServletTest extends AbstractIntegrationTest {
 
     @Test
-    public void doGetTest() throws IOException, SQLException {
+    @SneakyThrows
+    public void doGetTest() {
         var request = mock(HttpServletRequest.class);
         var response = mock(HttpServletResponse.class);
 
@@ -28,7 +32,7 @@ public class AddProductServletTest extends AbstractIntegrationTest {
         StringWriter stringWriter = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
 
-        var servlet = new AddProductServlet();
+        var servlet = new AddProductServlet(database);
         servlet.doGet(request, response);
 
         verify(response, times(1)).setContentType(eq("text/html"));

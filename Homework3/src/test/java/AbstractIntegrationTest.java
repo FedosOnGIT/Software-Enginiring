@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.BeforeEach;
+import refactoring.repository.Database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,6 +8,7 @@ import java.sql.Statement;
 import java.util.Map;
 
 public abstract class AbstractIntegrationTest {
+    protected Database database = new Database("jdbc:sqlite:test.db");
     @BeforeEach
     protected void init() throws SQLException {
         try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {

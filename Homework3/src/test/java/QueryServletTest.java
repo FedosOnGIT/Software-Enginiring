@@ -1,12 +1,11 @@
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import refactoring.servlet.QueryServlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.sql.SQLException;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,7 +13,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class QueryServletTest extends AbstractIntegrationTest {
-    private StringWriter common(String command) throws SQLException, IOException {
+    @SneakyThrows
+    private StringWriter common(String command) {
         fill(Map.of("fisting", 300,
                 "dead inside", 993));
         var request = mock(HttpServletRequest.class);
@@ -25,7 +25,7 @@ public class QueryServletTest extends AbstractIntegrationTest {
         StringWriter stringWriter = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
 
-        var servlet = new QueryServlet();
+        var servlet = new QueryServlet(database);
         servlet.doGet(request, response);
 
         verify(response, times(1)).setContentType(eq("text/html"));
@@ -35,7 +35,7 @@ public class QueryServletTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void maxTest() throws SQLException, IOException {
+    public void maxTest() {
         var stringWriter = common("max");
         assertEquals("""
                 <html><body>
@@ -46,7 +46,7 @@ public class QueryServletTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void minTest() throws SQLException, IOException {
+    public void minTest() {
         var stringWriter = common("min");
         assertEquals("""
                 <html><body>
@@ -57,7 +57,7 @@ public class QueryServletTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void sumTest() throws SQLException, IOException {
+    public void sumTest() {
         var stringWriter = common("sum");
         assertEquals("""
                 <html><body>
@@ -68,7 +68,7 @@ public class QueryServletTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void countTest() throws SQLException, IOException {
+    public void countTest() {
         var stringWriter = common("count");
         assertEquals("""
                 <html><body>

@@ -3,33 +3,24 @@ package refactoring.servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import refactoring.dto.ProductDto;
+import refactoring.repository.Database;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 
 /**
  * @author akirakozov
  */
+@RequiredArgsConstructor
 public class AddProductServlet extends HttpServlet {
-
+    private final Database database;
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String name = request.getParameter("name");
-        long price = Long.parseLong(request.getParameter("price"));
+        Integer price = Integer.parseInt(request.getParameter("price"));
 
-        try {
-            try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-                String sql = "INSERT INTO PRODUCT " +
-                        "(NAME, PRICE) VALUES (\"" + name + "\"," + price + ")";
-                Statement stmt = c.createStatement();
-                stmt.executeUpdate(sql);
-                stmt.close();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        database.insert(ProductDto.builder().name(name).price(price).build());
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);

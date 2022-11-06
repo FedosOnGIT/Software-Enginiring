@@ -2,11 +2,9 @@ package refactoring.repository;
 
 import refactoring.dto.ProductDto;
 
-import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Database {
@@ -27,12 +25,12 @@ public class Database {
         }
     }
 
-    public List<ProductDto> executeQuery(String query, Function<ResultSet, List<ProductDto>> processing) {
+    public <R> List<R> executeQuery(String query, Function<ResultSet, List<R>> processing) {
         return execute(statement -> statement.executeQuery(query), processing);
     }
 
-    public int executeUpdate(String query) {
-        return execute(statement -> statement.executeUpdate(query), Function.identity());
+    public void executeUpdate(String query) {
+        execute(statement -> statement.executeUpdate(query), Function.identity());
     }
 
     public void init() {
@@ -43,47 +41,59 @@ public class Database {
         executeUpdate(sql);
     }
 
-    public int insert(ProductDto product) {
+    public void insert(ProductDto product) {
         String sql = "INSERT INTO PRODUCT " +
                 "(NAME, PRICE) VALUES (\"" + product.getName() + "\"," + product.getPrice() + ")";
-        return executeUpdate(sql);
+        executeUpdate(sql);
     }
 
-    public List<ProductDto> get(String query) {
+    private <T> List<T> get(String query, ResultSetFunction<T> processor) {
         return executeQuery(query, resultSet -> {
             try {
-                List<ProductDto> products = new ArrayList<>();
+                List<T> values = new ArrayList<>();
                 while (resultSet.next()) {
-                    products.add(ProductDto
-                            .builder()
-                            .name(resultSet.getString("name"))
-                            .price(resultSet.getInt("price"))
-                            .build());
+                    values.add(processor.apply(resultSet));
                 }
-                return products;
+                return values;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
+    private List<ProductDto> getProducts(String query) {
+        return get(query,
+                resultSet -> ProductDto
+                        .builder()
+                        .name(resultSet.getString("name"))
+                        .price(resultSet.getInt("price"))
+                        .build()
+        );
+    }
+
+    private List<Integer> getValues(String query) {
+        return get(query,
+                resultSet -> resultSet.getInt(1));
+    }
+
+
     public List<ProductDto> getAll() {
-        return get("SELECT * FROM PRODUCT");
+        return getProducts("SELECT * FROM PRODUCT");
     }
 
     public List<ProductDto> getMax() {
-        return get("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1");
+        return getProducts("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1");
     }
 
     public List<ProductDto> getMin() {
-        return get("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1");
+        return getProducts("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1");
     }
 
-    public List<ProductDto> getSum() {
-        return get("SELECT SUM(price) FROM PRODUCT");
+    public List<Integer> getSum() {
+        return getValues("SELECT SUM(price) FROM PRODUCT");
     }
 
-    public List<ProductDto> getCount() {
-        return get("SELECT COUNT(*) FROM PRODUCT");
+    public List<Integer> getCount() {
+        return getValues("SELECT COUNT(*) FROM PRODUCT");
     }
 }
