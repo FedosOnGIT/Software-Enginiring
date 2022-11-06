@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import refactoring.dto.ProductDto;
 import refactoring.repository.Database;
+import refactoring.utils.HTMLProcessor;
 
 import java.io.IOException;
 
@@ -22,8 +23,7 @@ public class AddProductServlet extends HttpServlet {
 
         database.insert(ProductDto.builder().name(name).price(price).build());
 
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
+        HTMLProcessor.endOfProcessing(response);
         response.getWriter().println("OK");
     }
 }

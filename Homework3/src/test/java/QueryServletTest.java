@@ -14,7 +14,7 @@ import static org.mockito.Mockito.*;
 
 public class QueryServletTest extends AbstractIntegrationTest {
     @SneakyThrows
-    private StringWriter common(String command) {
+    private StringWriter common(String command, Integer timesOfWriter) {
         fill(Map.of("fisting", 300,
                 "dead inside", 993));
         var request = mock(HttpServletRequest.class);
@@ -30,13 +30,13 @@ public class QueryServletTest extends AbstractIntegrationTest {
 
         verify(response, times(1)).setContentType(eq("text/html"));
         verify(response, times(1)).setStatus(eq(HttpServletResponse.SC_OK));
-        verify(response, times(4)).getWriter();
+        verify(response, times(timesOfWriter)).getWriter();
         return stringWriter;
     }
 
     @Test
     public void maxTest() {
-        var stringWriter = common("max");
+        var stringWriter = common("max", 4);
         assertEquals("""
                 <html><body>
                 <h1>Product with max price: </h1>
@@ -47,7 +47,7 @@ public class QueryServletTest extends AbstractIntegrationTest {
 
     @Test
     public void minTest() {
-        var stringWriter = common("min");
+        var stringWriter = common("min", 4);
         assertEquals("""
                 <html><body>
                 <h1>Product with min price: </h1>
@@ -58,7 +58,7 @@ public class QueryServletTest extends AbstractIntegrationTest {
 
     @Test
     public void sumTest() {
-        var stringWriter = common("sum");
+        var stringWriter = common("sum", 4);
         assertEquals("""
                 <html><body>
                 Summary price:\040
@@ -69,12 +69,20 @@ public class QueryServletTest extends AbstractIntegrationTest {
 
     @Test
     public void countTest() {
-        var stringWriter = common("count");
+        var stringWriter = common("count", 4);
         assertEquals("""
                 <html><body>
                 Number of products:\040
                 2
                 </body></html>
+                """, stringWriter.toString());
+    }
+
+    @Test
+    public void unknownMethodTest() {
+        var stringWriter = common("avg", 1);
+        assertEquals("""
+                Unknown command: avg
                 """, stringWriter.toString());
     }
 }
