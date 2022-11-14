@@ -1,0 +1,13 @@
+server:
+  port: 9081
+vk:
+  connectionTimeout: 5000
+  socketTimeout: 1000
+  token: vk1.a.PuYhMFPDdOCfW3niQ-0cKgBrFSEa3GYiaDT6km79g0b239sb0M85THoFZtqOfsPg0s1aT_H79nE22zRleY07NHR06BMCjQp9-BUrLmUEhgqmBHf4-IrC1yoGc_FPCZZz0pSWf2hqY1Su4ytght1TBsQ3IEbR_qfGcyqTYLYWcAP5BB-sJ0iTYX_7qviu7Np60TtfsIxsQUXxQ2r-TsFWjw
+  version: 5.131
+  schema: https
+  host: api.vk.com
+  basePath: /method
+
+  newsFeed:
+    search: /newsfeed.search
