@@ -1,12 +1,14 @@
-import java.util.LinkedList
-import java.util.Queue
+import list.LinkedQueue
+import list.Node
 
 class LRUCache<T>(private val size: Int) {
-    private val list: Queue<Int> = LinkedList()
-    private val map: HashMap<Int, T> = hashMapOf()
+    private val list: LinkedQueue
+    private val map: HashMap<Int, Pair<T, Node>>
 
     init {
         assert(size > 0) { "Size must be more than 0" }
+        list = LinkedQueue(size)
+        map = hashMapOf()
     }
 
     private fun mainAssert() {
@@ -14,11 +16,20 @@ class LRUCache<T>(private val size: Int) {
         check(list.size == map.size) { "Cache out of sync" }
     }
 
+    private fun move(key: Int, value: T?) : T? {
+        val old = map[key] ?: return null
+        list.delete(old.second)
+        val node: Node = list.add(key = key)
+        val input = Pair(value ?: old.first, second = node)
+        map[key] = input
+        return input.first
+    }
+
     fun put(key: Int, value: T) {
         mainAssert()
 
         if (map.containsKey(key)) {
-            map[key] = value
+            move(key = key, value)
         } else {
             if (list.size == size) {
                 val old = list.poll()
@@ -27,8 +38,7 @@ class LRUCache<T>(private val size: Int) {
                     "Deleting went wrong"
                 }
             }
-            list.add(key)
-            map[key] = value
+            map[key] = Pair(value, list.add(key))
         }
 
         mainAssert()
@@ -36,7 +46,7 @@ class LRUCache<T>(private val size: Int) {
 
     fun get(key: Int): T? {
         mainAssert()
-        return map[key]
+        return move(key = key, null)
     }
 
     fun size(): Int = list.size
