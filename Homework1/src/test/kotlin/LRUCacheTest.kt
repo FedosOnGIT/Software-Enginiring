@@ -38,4 +38,20 @@ class LRUCacheTest {
         assertEquals("it is not 2", cache.get(2))
         assertEquals("3", cache.get(3))
     }
+
+    @Test
+    fun getMustPutToEndTest() {
+        val cache = LRUCache<String>(2)
+        val answer = "Always find it"
+
+        cache.put(1, answer)
+        cache.put(2, "2")
+        assertEquals(2, cache.size())
+        assertEquals(answer, cache.get(1))
+
+        cache.put(3, "3")
+        assertEquals(2, cache.size())
+        assertEquals(answer, cache.get(1))
+        assertEquals(null, cache.get(2))
+    }
 }
